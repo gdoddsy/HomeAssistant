@@ -1,0 +1,64 @@
+blueprint:
+  name: Unlock Front Door when someone comes home
+  description: Unlocks a door when someone comes home, and then locks it again 5 minutes later if the sensor says it's closed
+  domain: automation
+  author: Greg Dodd
+  input:
+    device_tracker: 
+      name: Device Tracker
+      selector:
+        entity:
+          filter:
+            domain: device_tracker
+    lock_to_unlock:
+      name: Lock to Unlock
+      selector:
+        entity:
+          filter:
+            domain: lock
+    door_sensor:
+      name: Door Sensor
+      selector:
+        entity:
+          filter:
+            domain: binary_sensor
+    zone_to_monitor:
+      name: Zone to Monitor
+      selector:
+        entity:
+          filter:
+            domain: zone
+triggers:
+  - trigger: zone
+    entity_id: !input device_tracker
+    zone: !input zone_to_monitor
+    event: enter
+conditions:
+  - condition: state
+    entity_id: !input lock_to_unlock
+    state: locked
+actions:
+  - action: lock.unlock
+    metadata: {}
+    data: {}
+    target:
+      entity_id: !input lock_to_unlock
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - if:
+      - condition: state
+        entity_id: !input door_sensor
+        state: "off"
+      - condition: state
+        entity_id: !input lock_to_unlock
+        state: unlocked
+    then:
+      - action: lock.unlock
+        metadata: {}
+        data: {}
+        target:
+          entity_id: !input lock_to_unlock
+mode: single
