@@ -7,9 +7,6 @@ triggers:
     entity_id: !input device_tracker
     zone: zone.home
     event: enter
-input:
-  device_tracker: Device Tracker
-  descrption: The device that should unlock the front door.
 conditions:
   - condition: device
     device_id: 6f82607bee0689bf022b7d4b44a88c7a
@@ -37,3 +34,6 @@ actions:
         entity_id: 6074640ada381b01bd5d6b9692417c7d
         type: lock
 mode: single
+input:
+  device_tracker: Device Tracker
+  descrption: The device that should unlock the front door.
