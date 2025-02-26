@@ -6,7 +6,6 @@ blueprint:
   input:
     device_tracker: 
       name: Device Tracker
-      descrption: The device that should unlock the front door.
       selector:
         entity:
           filter:
