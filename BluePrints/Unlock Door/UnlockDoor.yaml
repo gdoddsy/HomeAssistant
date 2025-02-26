@@ -2,6 +2,9 @@ blueprint:
   name: Unlock Front Door when someone comes home
   description: Unlocks a door when someone comes home, and then locks it again 10 minutes later if the sensor says it's closed
   domain: automation
+  input:
+    device_tracker: Device Tracker
+    descrption: The device that should unlock the front door.
 triggers:
   - trigger: zone
     entity_id: !input device_tracker
@@ -34,6 +37,3 @@ actions:
         entity_id: 6074640ada381b01bd5d6b9692417c7d
         type: lock
 mode: single
-input:
-  device_tracker: Device Tracker
-  descrption: The device that should unlock the front door.
