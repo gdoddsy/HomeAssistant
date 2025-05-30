@@ -34,6 +34,14 @@ blueprint:
         entity:
           filter:
             domain: light
+    ignore_inside_if_light_is_on:
+      name: Ignore inside if this light is on
+      description: if this light is already on, then don't turn on the inside light.
+      default: none
+      selector:
+        entity:
+          filter:
+            domain: light
     outside_lights:
       name: Outside Lights to Turn On
       selector:
@@ -91,9 +99,13 @@ actions:
             - condition: state
               entity_id: !input inside_lights
               state: "off"
-            - condition: state
-              entity_id: light.landing
-              state: "off"
+            - condition: or
+              conditions:
+                - condition: template
+                  value_template: "{{ not is_defined(ignore_inside_if_light_is_on) }}"
+                - condition: state
+                  entity_id: !input ignore_inside_if_light_is_on
+                  state: "off"
             - action: light.turn_on
               metadata: {}
               data:
