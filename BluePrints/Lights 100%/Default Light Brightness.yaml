@@ -1,6 +1,6 @@
 blueprint:
-  name: Lights 100%
-  description: Sets the lights brightness to 100% when triggered by anything BUT an automation
+  name: Default Light Brightness
+  description: Sets the lights to a set brightness when triggered by anything BUT an automation
   domain: automation
   author: Greg Dodd
   input:
@@ -10,6 +10,15 @@ blueprint:
         entity:
           filter:
             domain: light
+    brightness_pct:
+      name: Brightness Percentage
+      description: Set brightness percentage (defaults to 100)
+      default: 100
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: "%"
 triggers:
   - trigger: state
     entity_id: !input light
@@ -22,7 +31,7 @@ actions:
   - action: light.turn_on
     metadata: {}
     data:
-      brightness_pct: 100
+      brightness_pct: !input brightness_pct
     target:
       entity_id: !input light
 mode: single
