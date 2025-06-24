@@ -42,12 +42,6 @@ blueprint:
         entity:
           filter:
             domain: light
-    outside_lights:
-      name: Outside Lights to Turn On
-      selector:
-        entity:
-          filter:
-            domain: light
 
 triggers:
   - trigger: zone
@@ -112,26 +106,6 @@ actions:
                 brightness_pct: 100
               target:
                 entity_id: !input inside_lights
-        - alias: Outside Lights
-          sequence:
-            - condition: state
-              entity_id: !input outside_lights
-              state: "off"
-            - action: light.turn_on
-              metadata: {}
-              data: {}
-              target:
-                entity_id: !input outside_lights
-            - delay:
-                hours: 0
-                minutes: 15
-                seconds: 0
-                milliseconds: 0
-            - action: light.turn_off
-              metadata: {}
-              data: {}
-              target:
-                entity_id: !input outside_lights
         alias: Manage Lights
 
 mode: single
