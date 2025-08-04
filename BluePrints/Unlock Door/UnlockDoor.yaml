@@ -16,12 +16,6 @@ blueprint:
         entity:
           filter:
             domain: lock
-    door_sensor:
-      name: Door Sensor
-      selector:
-        entity:
-          filter:
-            domain: binary_sensor
     zone_to_monitor:
       name: Zone to Monitor
       selector:
@@ -61,22 +55,6 @@ actions:
           data: {}
           target:
             entity_id: !input lock_to_unlock
-        - delay:
-            hours: 0
-            minutes: 5
-            seconds: 0
-            milliseconds: 0
-        - condition: state
-          entity_id: !input door_sensor
-          state: "off"
-        - condition: state
-          entity_id: !input lock_to_unlock
-          state: unlocked
-        - action: lock.lock
-          metadata: {}
-          data: {}
-          target:
-            entity_id: !input lock_to_unlock
         alias: Manage Front Door Lock
       - sequence:
         - condition: or
@@ -86,8 +64,6 @@ actions:
             - condition: sun
               after: sunset
           alias: Night time
-        - alias: Lights on
-          parallel:
         - alias: Inside Lights
           sequence:
             - condition: state
@@ -107,5 +83,4 @@ actions:
               target:
                 entity_id: !input inside_lights
         alias: Manage Lights
-
 mode: single
