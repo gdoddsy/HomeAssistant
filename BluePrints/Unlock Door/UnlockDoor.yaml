@@ -1,6 +1,6 @@
 blueprint:
   name: Unlock Front Door when someone comes home
-  description: Unlocks a door when someone comes home, turns some lights on, 
+  description: Unlocks a door when someone comes home, turns some lights on, and then locks it again 5 minutes later if the sensor says it's closed
   domain: automation
   author: Greg Dodd
   input:
@@ -37,18 +37,21 @@ blueprint:
           filter:
             domain: light
 
-triggers:
-  - trigger: zone
+trigger:
+  - platform: zone
     entity_id: !input device_tracker
     zone: !input zone_to_monitor
     event: enter
+
 conditions:
   - condition: template
     value_template: >-
-      {% set zone_name = states[ '{{ !input zone_to_monitor }}' ].name %}
-      {% set was_outside_zone = trigger.from_state is not none and trigger.from_state.state != zone_name %}
-      {% set away_for = (now() - trigger.from_state.last_changed).total_seconds() if trigger.from_state is not none else 0 %}
-      {{ was_outside_zone and away_for > 300 }}
+      {% set from = trigger.from_state %}
+      {% set to = trigger.to_state %}
+      {{ from is not none and to is not none
+         and from.state != to.state
+         and (as_timestamp(now()) - as_timestamp(from.last_changed)) > 300 }}
+
 actions:
   - alias: Actions to Run
     parallel:
@@ -57,8 +60,6 @@ actions:
           entity_id: !input lock_to_unlock
           state: locked
         - action: lock.unlock
-          metadata: {}
-          data: {}
           target:
             entity_id: !input lock_to_unlock
         alias: Manage Front Door Lock
@@ -78,15 +79,17 @@ actions:
             - condition: or
               conditions:
                 - condition: template
-                  value_template: "{{ not is_defined(ignore_inside_if_light_is_on) }}"
+                  # If no "ignore" light provided (left as "none"), skip the block
+                  value_template: >-
+                    {{ iif(states('!input ignore_inside_if_light_is_on') in ('unknown','unavailable','none',''), true, false) }}
                 - condition: state
                   entity_id: !input ignore_inside_if_light_is_on
                   state: "off"
             - action: light.turn_on
-              metadata: {}
               data:
                 brightness_pct: 100
               target:
                 entity_id: !input inside_lights
         alias: Manage Lights
+
 mode: single
