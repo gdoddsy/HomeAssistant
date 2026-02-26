@@ -1,6 +1,6 @@
 blueprint:
   name: Unlock Front Door when someone comes home
-  description: Unlocks a door when someone comes home, turns some lights on, and then locks it again 5 minutes later if the sensor says it's closed
+  description: Unlocks a door when someone comes home, turns some lights on, 
   domain: automation
   author: Greg Dodd
   input:
@@ -44,10 +44,11 @@ triggers:
     event: enter
 conditions:
   - condition: template
-    value_template: >
-      {% set last_left = states[device_tracker].last_changed %}
-      {% set now = now() %}
-      {{ (now - last_left).total_seconds() > 600 }}
+    value_template: >-
+      {% set zone_name = states[ '{{ !input zone_to_monitor }}' ].name %}
+      {% set was_outside_zone = trigger.from_state is not none and trigger.from_state.state != zone_name %}
+      {% set away_for = (now() - trigger.from_state.last_changed).total_seconds() if trigger.from_state is not none else 0 %}
+      {{ was_outside_zone and away_for > 300 }}
 actions:
   - alias: Actions to Run
     parallel:
