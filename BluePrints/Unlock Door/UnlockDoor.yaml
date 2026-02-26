@@ -42,7 +42,16 @@ triggers:
     entity_id: !input device_tracker
     zone: !input zone_to_monitor
     event: enter
-conditions: []
+conditions:
+  - condition: template
+    value_template: >
+      {% set zone_name = state_attr(!input zone_to_monitor, 'friendly_name') %}
+      {# Ensure the person was not already in the zone (e.g., 'Home') #}
+      {% set was_outside_zone = trigger.from_state is not none and trigger.from_state.state != zone_name %}
+      {# Ensure they were outside for at least 5 minutes before this enter event #}
+      {% set away_for = (now() - trigger.from_state.last_changed).total_seconds() if trigger.from_state is not none else 0 %}
+      {{ was_outside_zone and away_for > 300 }}
+
 actions:
   - alias: Actions to Run
     parallel:
